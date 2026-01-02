@@ -1,0 +1,58 @@
+name: vegiffyy_vendor
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.6.0
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.3
+  fl_chart: ^0.69.0
+  image_picker: ^1.2.1
+  fluttertoast: ^8.2.4
+  url_launcher: ^6.3.2
+  intl: ^0.20.2
+  razorpay_flutter: ^1.4.0
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  file_picker: ^10.3.8
+  geolocator: ^14.0.2
+  path_provider: ^2.1.2
+  open_filex: ^4.4.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+  # ✅ REQUIRED FOR APP ICON GENERATION
+  flutter_launcher_icons: ^0.13.1
+
+# ✅ APP LAUNCHER ICON CONFIG (TOP LEVEL)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/appstore.png
+  remove_alpha_ios: true
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/appstore.png
+    - assets/vegiggyy_vendor.jpeg
+    - assets/logo.png
+    - assets/pdfs/declaration.pdf
+    - assets/pdfs/vendor_agreement.pdf
