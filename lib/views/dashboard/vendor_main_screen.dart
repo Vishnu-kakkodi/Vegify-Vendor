@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:vegiffyy_vendor/navigation/vendor_navigation_provider.dart';
 import 'package:vegiffyy_vendor/navigation/vendor_section.dart';
@@ -144,6 +145,85 @@ VendorSection _sectionFromBottomIndex(int index) {
     }
   }
 
+
+  Future<void> _launchUrl(String url) async {
+  final uri = Uri.parse(url);
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open link')),
+    );
+  }
+}
+
+
+Future<void> _confirmDeleteAccount() async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Delete Account'),
+      content: const Text(
+        'Are you sure you want to permanently delete your account? '
+        'This action cannot be undone.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Yes, Delete'),
+        ),
+      ],
+    ),
+  );
+
+  if (ok == true) {
+    _deleteAccount();
+  }
+}
+
+
+Future<void> _deleteAccount() async {
+  final vendorId = context.read<AuthProvider>().vendor?.id;
+  if (vendorId == null) return;
+
+  try {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Deleting account...')),
+    );
+
+    final res = await http.delete(
+      Uri.parse('https://api.vegiffyy.com/api/vendor/delete-vendor/$vendorId'),
+    );
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+
+      if (data['success'] == true) {
+        await context.read<AuthProvider>().logout();
+
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+        );
+      } else {
+        throw Exception(data['message']);
+      }
+    } else {
+      throw Exception('Failed to delete account');
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  }
+}
+
+
   // 🔹 LOGOUT
   Future<void> _confirmLogout() async {
     final ok = await showDialog<bool>(
@@ -240,14 +320,29 @@ VendorSection _sectionFromBottomIndex(int index) {
     final vendor = context.watch<AuthProvider>().vendor;
 
     return Scaffold(
-      drawer: _VendorDrawer(
-        selectedSection: nav.current,
-        onSelectSection: (s) {
-          context.read<VendorNavigationProvider>().setSection(s);
-          Navigator.pop(context);
-        },
-        onLogout: _confirmLogout,
-      ),
+drawer: _VendorDrawer(
+  selectedSection: nav.current,
+  onSelectSection: (s) {
+    context.read<VendorNavigationProvider>().setSection(s);
+    Navigator.pop(context);
+  },
+  onLogout: _confirmLogout,
+
+  // ✅ PASS FUNCTIONS FROM PARENT
+  onPrivacy: () {
+    Navigator.pop(context);
+    _launchUrl('https://vegiffyy-vendor-policy.onrender.com/privacy-and-policy');
+  },
+  onTerms: () {
+    Navigator.pop(context);
+    _launchUrl('https://vegiffyy-vendor-policy.onrender.com/terms-and-conditions');
+  },
+  onDeleteAccount: () {
+    Navigator.pop(context);
+    _confirmDeleteAccount();
+  },
+),
+
 appBar: AppBar(
   elevation: 1,
   backgroundColor: Colors.white,
@@ -434,11 +529,17 @@ class _VendorDrawer extends StatelessWidget {
   final VendorSection selectedSection;
   final ValueChanged<VendorSection> onSelectSection;
   final VoidCallback onLogout;
+    final VoidCallback onPrivacy;
+  final VoidCallback onTerms;
+  final VoidCallback onDeleteAccount;
 
   const _VendorDrawer({
     required this.selectedSection,
     required this.onSelectSection,
     required this.onLogout,
+        required this.onPrivacy,
+    required this.onTerms,
+    required this.onDeleteAccount,
   });
 
   @override
@@ -567,6 +668,31 @@ class _VendorDrawer extends StatelessWidget {
                 ),
 
                 _item(Icons.account_balance_wallet, 'My Wallet', VendorSection.wallet),
+
+ListTile(
+  leading: const Icon(Icons.privacy_tip),
+  title: const Text('Privacy Policy'),
+  onTap: onPrivacy, // ✅ CALLBACK
+),
+
+ListTile(
+  leading: const Icon(Icons.description),
+  title: const Text('Terms & Conditions'),
+  onTap: onTerms, // ✅ CALLBACK
+),
+
+ListTile(
+  leading: const Icon(Icons.delete, color: Colors.red),
+  title: const Text(
+    'Delete Account',
+    style: TextStyle(color: Colors.red),
+  ),
+  onTap: onDeleteAccount, // ✅ CALLBACK
+),
+
+
+
+
 
                 ExpansionTile(
                   leading: const Icon(Icons.currency_rupee),

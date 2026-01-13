@@ -56,3 +56,5 @@ flutter:
     - assets/logo.png
     - assets/pdfs/declaration.pdf
     - assets/pdfs/vendor_agreement.pdf
+    - assets/vegsplash.png
+    - assets/websplash.png
