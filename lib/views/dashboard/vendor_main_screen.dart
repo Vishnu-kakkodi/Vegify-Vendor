@@ -694,14 +694,14 @@ ListTile(
 
 
 
-                ExpansionTile(
-                  leading: const Icon(Icons.currency_rupee),
-                  title: const Text('Pay Joining Fee'),
-                  children: [
-                    _sub('Pay', VendorSection.payJoining),
-                    _sub('My Paid Plan', VendorSection.myPaidPlan),
-                  ],
-                ),
+                // ExpansionTile(
+                //   leading: const Icon(Icons.currency_rupee),
+                //   title: const Text('Pay Joining Fee'),
+                //   children: [
+                //     _sub('Pay', VendorSection.payJoining),
+                //     _sub('My Paid Plan', VendorSection.myPaidPlan),
+                //   ],
+                // ),
 
                 _item(Icons.person, 'My Profile', VendorSection.profile),
                 _item(Icons.percent, 'My Commission', VendorSection.commission),
